@@ -246,12 +246,12 @@ define( 'AI1WM_SUPPORT_EMAIL', 'support@servmask.com' );
 // =================
 // = Max File Size =
 // =================
-define( 'AI1WM_MAX_FILE_SIZE', 1000000000 );
+define( 'AI1WM_MAX_FILE_SIZE', 10000000000 );
 
 // ==================
 // = Max Chunk Size =
 // ==================
-define( 'AI1WM_MAX_CHUNK_SIZE', 5242880 );
+define( 'AI1WM_MAX_CHUNK_SIZE', 52428800 );
 
 // =====================
 // = Max Chunk Retries =
