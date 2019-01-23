@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2017 ServMask Inc.
+ * Copyright (C) 2014-2018 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,20 @@
 class Ai1wm_Export_Enumerate {
 
 	public static function execute( $params ) {
+
+		// Get total files count
+		if ( isset( $params['total_files_count'] ) ) {
+			$total_files_count = (int) $params['total_files_count'];
+		} else {
+			$total_files_count = 0;
+		}
+
+		// Get total files size
+		if ( isset( $params['total_files_size'] ) ) {
+			$total_files_size = (int) $params['total_files_size'];
+		} else {
+			$total_files_size = 0;
+		}
 
 		// Set progress
 		Ai1wm_Status::info( __( 'Retrieving a list of all WordPress files...', AI1WM_PLUGIN_NAME ) );
@@ -88,27 +102,16 @@ class Ai1wm_Export_Enumerate {
 			$exclude_filters = array_merge( $exclude_filters, array( 'uploads', 'blogs.dir' ) );
 		}
 
-		// Get total files count
-		if ( isset( $params['total_files_count'] ) ) {
-			$total_files_count = (int) $params['total_files_count'];
-		} else {
-			$total_files_count = 0;
-		}
-
-		// Get total files size
-		if ( isset( $params['total_files_size'] ) ) {
-			$total_files_size = (int) $params['total_files_size'];
-		} else {
-			$total_files_size = 0;
-		}
-
 		// Create map file
-		$filemap = ai1wm_open( ai1wm_filemap_path( $params ) , 'a+' );
+		$filemap = ai1wm_open( ai1wm_filemap_path( $params ), 'w' );
 
 		try {
 
 			// Iterate over content directory
 			$iterator = new Ai1wm_Recursive_Directory_Iterator( WP_CONTENT_DIR );
+
+			// Exclude new line file names
+			$iterator = new Ai1wm_Recursive_Newline_Filter( $iterator );
 
 			// Exclude uploads, plugins or themes
 			$iterator = new Ai1wm_Recursive_Exclude_Filter( $iterator, apply_filters( 'ai1wm_exclude_content_from_export', $exclude_filters ) );
@@ -123,7 +126,7 @@ class Ai1wm_Export_Enumerate {
 						$total_files_count++;
 
 						// Add current file size
-						$total_files_size += filesize( $iterator->getPathname() );
+						$total_files_size += $iterator->getSize();
 					}
 				}
 			}

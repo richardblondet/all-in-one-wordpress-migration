@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2017 ServMask Inc.
+ * Copyright (C) 2014-2018 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,7 @@ class Ai1wm_Import_Controller {
 	public static function import( $params = array() ) {
 		global $wp_filter;
 
-		// Set error handler
-		@set_error_handler( 'Ai1wm_Handler::error' );
-
-		// Set shutdown handler
-		@register_shutdown_function( 'Ai1wm_Handler::shutdown' );
+		ai1wm_setup_environment();
 
 		// Set params
 		if ( empty( $params ) ) {
@@ -52,14 +48,13 @@ class Ai1wm_Import_Controller {
 		// Set secret key
 		$secret_key = null;
 		if ( isset( $params['secret_key'] ) ) {
-			$secret_key = $params['secret_key'];
+			$secret_key = trim( $params['secret_key'] );
 		}
 
 		try {
 			// Ensure that unauthorized people cannot access import action
 			ai1wm_verify_secret_key( $secret_key );
 		} catch ( Ai1wm_Not_Valid_Secret_Key_Exception $e ) {
-			Ai1wm_Log::error( $e->getMessage() );
 			exit;
 		}
 
@@ -90,7 +85,9 @@ class Ai1wm_Import_Controller {
 							echo json_encode( array( 'errors' => array( array( 'code' => $e->getCode(), 'message' => $e->getMessage() ) ) ) );
 							exit;
 						} catch ( Exception $e ) {
-							Ai1wm_Status::error( $e->getMessage() );
+							Ai1wm_Status::error( __( 'Unable to import', AI1WM_PLUGIN_NAME ), $e->getMessage() );
+							Ai1wm_Notification::error( __( 'Unable to import', AI1WM_PLUGIN_NAME ), $e->getMessage() );
+							Ai1wm_Directory::delete( ai1wm_storage_path( $params ) );
 							exit;
 						}
 					}
@@ -103,7 +100,7 @@ class Ai1wm_Import_Controller {
 
 					// Do request
 					if ( $completed === false || ( $next = next( $filters ) ) && ( $params['priority'] = key( $filters ) ) ) {
-						if ( isset( $params['ai1wm_manual_import'] ) || isset( $params['ai1wm_manual_backups'] ) ) {
+						if ( isset( $params['ai1wm_manual_import'] ) || isset( $params['ai1wm_manual_restore'] ) ) {
 							echo json_encode( $params );
 							exit;
 						}
@@ -127,6 +124,8 @@ class Ai1wm_Import_Controller {
 			apply_filters( 'ai1wm_import_s3', Ai1wm_Template::get_content( 'import/button-s3' ) ),
 			apply_filters( 'ai1wm_import_onedrive', Ai1wm_Template::get_content( 'import/button-onedrive' ) ),
 			apply_filters( 'ai1wm_import_box', Ai1wm_Template::get_content( 'import/button-box' ) ),
+			apply_filters( 'ai1wm_import_mega', Ai1wm_Template::get_content( 'import/button-mega' ) ),
+			apply_filters( 'ai1wm_import_digitalocean', Ai1wm_Template::get_content( 'import/button-digitalocean' ) ),
 		);
 	}
 

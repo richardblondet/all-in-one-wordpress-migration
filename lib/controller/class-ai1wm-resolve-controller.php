@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2017 ServMask Inc.
+ * Copyright (C) 2014-2018 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,14 +35,13 @@ class Ai1wm_Resolve_Controller {
 		// Set secret key
 		$secret_key = null;
 		if ( isset( $params['secret_key'] ) ) {
-			$secret_key = $params['secret_key'];
+			$secret_key = trim( $params['secret_key'] );
 		}
 
 		try {
 			// Ensure that unauthorized people cannot access resolve action
 			ai1wm_verify_secret_key( $secret_key );
 		} catch ( Ai1wm_Not_Valid_Secret_Key_Exception $e ) {
-			Ai1wm_Log::error( $e->getMessage() );
 			exit;
 		}
 

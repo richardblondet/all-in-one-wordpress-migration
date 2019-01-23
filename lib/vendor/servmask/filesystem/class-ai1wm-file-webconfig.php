@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2017 ServMask Inc.
+ * Copyright (C) 2014-2018 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ class Ai1wm_File_Webconfig {
 	 * The method will create web.config file with contents '<mimeMap fileExtension=".wpress" mimeType="application/octet-stream" />'
 	 *
 	 * @param  string  $path Path to the web.config file
-	 * @return boolean|null
+	 * @return boolean
 	 */
 	public static function create( $path ) {
 		$contents = "<configuration>\n" .

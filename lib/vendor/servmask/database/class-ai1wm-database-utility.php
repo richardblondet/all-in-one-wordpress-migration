@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (C) 2014-2017 ServMask Inc.
+ * Copyright (C) 2014-2018 ServMask Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ class Ai1wm_Database_Utility {
 			// Some unserialized data cannot be re-serialized eg. SimpleXMLElements
 			if ( is_serialized( $data ) && ( $unserialized = @unserialize( $data ) ) !== false ) {
 				$data = self::replace_serialized_values( $from, $to, $unserialized, true );
-			} else if ( is_array( $data ) ) {
+			} elseif ( is_array( $data ) ) {
 				$tmp = array();
 				foreach ( $data as $key => $value ) {
 					$tmp[ $key ] = self::replace_serialized_values( $from, $to, $value, false );
@@ -68,7 +68,7 @@ class Ai1wm_Database_Utility {
 				$data = $tmp;
 				unset( $tmp );
 			} elseif ( is_object( $data ) ) {
-				$tmp = $data;
+				$tmp   = $data;
 				$props = get_object_vars( $data );
 				foreach ( $props as $key => $value ) {
 					$tmp->$key = self::replace_serialized_values( $from, $to, $value, false );
@@ -101,10 +101,12 @@ class Ai1wm_Database_Utility {
 	 * @return string
 	 */
 	public static function escape_mysql( $data ) {
-		return str_replace(
-			array( '\\', '\0', "\n", "\r", "\x1a", "'", '"', "\0" ),
-			array( '\\\\', '\\0', "\\n", "\\r", '\Z', "\'", '\"', '\0' ),
-			$data
+		return strtr(
+			$data,
+			array_combine(
+				array( "\x00", "\n", "\r", '\\', "'", '"', "\x1a" ),
+				array( '\\0', '\\n', '\\r', '\\\\', "\\'", '\\"', '\\Z' )
+			)
 		);
 	}
 
@@ -115,10 +117,12 @@ class Ai1wm_Database_Utility {
 	 * @return string
 	 */
 	public static function unescape_mysql( $data ) {
-		return str_replace(
-			array( '\\\\', '\\0', "\\n", "\\r", '\Z', "\'", '\"', '\0' ),
-			array( '\\', '\0', "\n", "\r", "\x1a", "'", '"', "\0" ),
-			$data
+		return strtr(
+			$data,
+			array_combine(
+				array( '\\0', '\\n', '\\r', '\\\\', "\\'", '\\"', '\\Z' ),
+				array( "\x00", "\n", "\r", '\\', "'", '"', "\x1a" )
+			)
 		);
 	}
 }
